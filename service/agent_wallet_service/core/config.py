@@ -15,9 +15,28 @@ class Settings(BaseSettings):
         case_sensitive=True,
     )
 
-    # Database
+    # Database - Railway provides DATABASE_URL, we convert it for asyncpg
     DATABASE_URL: str = "postgresql+asyncpg://wallet_user:wallet_secret@localhost:5432/agent_wallet"
-    DATABASE_URL_SYNC: str = "postgresql://wallet_user:wallet_secret@localhost:5432/agent_wallet"
+
+    @property
+    def DATABASE_URL_ASYNC(self) -> str:
+        """Get async database URL (converts postgresql:// to postgresql+asyncpg://)."""
+        url = self.DATABASE_URL
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        return url
+
+    @property
+    def DATABASE_URL_SYNC(self) -> str:
+        """Get sync database URL for Alembic."""
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        # Remove asyncpg if present
+        url = url.replace("postgresql+asyncpg://", "postgresql://")
+        return url
 
     # Security
     SECRET_KEY: str = "dev-secret-key-change-in-production"
