@@ -31,7 +31,7 @@ async def get_current_wallet(
         status=wallet.status,
         currency=wallet.currency,
         handle=wallet.handle,
-        metadata=wallet.metadata or {},
+        metadata=wallet.wallet_metadata or {},
         created_at=wallet.created_at,
         updated_at=wallet.updated_at,
     )

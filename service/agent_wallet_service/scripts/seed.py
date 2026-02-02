@@ -39,7 +39,7 @@ async def seed_database(session: AsyncSession) -> None:
         status=WalletStatus.ACTIVE,
         currency="USD",
         handle="@system",
-        metadata={"description": "System wallet for external deposits"},
+        wallet_metadata={"description": "System wallet for external deposits"},
     )
     session.add(system_wallet)
     await session.flush()
@@ -60,7 +60,7 @@ async def seed_database(session: AsyncSession) -> None:
         status=WalletStatus.ACTIVE,
         currency="USD",
         handle="@alice",
-        metadata={"name": "Alice", "email": "alice@example.com"},
+        wallet_metadata={"name": "Alice", "email": "alice@example.com"},
     )
     session.add(alice_wallet)
     await session.flush()
@@ -84,7 +84,7 @@ async def seed_database(session: AsyncSession) -> None:
         status=WalletStatus.ACTIVE,
         currency="USD",
         handle="@acme_store",
-        metadata={"name": "Acme Store", "business_id": "acme-123"},
+        wallet_metadata={"name": "Acme Store", "business_id": "acme-123"},
     )
     session.add(merchant_wallet)
     await session.flush()
@@ -171,7 +171,7 @@ async def seed_database(session: AsyncSession) -> None:
         idempotency_key="seed_deposit_alice_001",
         reference_id="seed_deposit",
         created_by_api_key_id=admin_key.id,
-        metadata={"description": "Initial seed deposit for Alice"},
+        entry_metadata={"description": "Initial seed deposit for Alice"},
     )
     session.add(deposit_entry)
     await session.flush()

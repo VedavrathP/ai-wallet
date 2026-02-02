@@ -160,7 +160,7 @@ async def list_wallet_transactions(
                 counterparty_wallet_id=counterparty_wallet_id,
                 counterparty_handle=counterparty_handle,
                 reference_id=entry.reference_id,
-                metadata=entry.metadata or {},
+                metadata=entry.entry_metadata or {},
                 created_at=entry.created_at,
             )
         )

@@ -64,7 +64,8 @@ class PaymentIntent(Base):
         DateTime(timezone=True),
         nullable=False,
     )
-    metadata: Mapped[Optional[dict[str, Any]]] = mapped_column(
+    intent_metadata: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        "metadata",  # Keep the column name in DB as "metadata"
         JSONB,
         nullable=True,
         default=dict,

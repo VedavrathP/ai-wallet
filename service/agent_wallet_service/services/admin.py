@@ -70,7 +70,7 @@ async def admin_create_wallet(
         status=WalletStatus.ACTIVE,
         currency=currency.upper(),
         handle=handle,
-        metadata=metadata or {},
+        wallet_metadata=metadata or {},
     )
     db.add(wallet)
     await db.flush()
@@ -92,7 +92,7 @@ async def admin_create_wallet(
         status=wallet.status.value,
         currency=wallet.currency,
         handle=wallet.handle,
-        metadata=wallet.metadata or {},
+        metadata=wallet.wallet_metadata or {},
         created_at=wallet.created_at,
         updated_at=wallet.updated_at,
     )

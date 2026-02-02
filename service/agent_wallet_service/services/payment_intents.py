@@ -81,7 +81,7 @@ async def create_payment_intent(
         currency=currency,
         status=PaymentIntentStatus.REQUIRES_PAYMENT,
         expires_at=expires_at,
-        metadata=metadata or {},
+        intent_metadata=metadata or {},
     )
     db.add(intent)
     await db.commit()
@@ -93,7 +93,7 @@ async def create_payment_intent(
         currency=intent.currency,
         status=intent.status.value,
         expires_at=intent.expires_at,
-        metadata=intent.metadata or {},
+        metadata=intent.intent_metadata or {},
         created_at=intent.created_at,
     )
 

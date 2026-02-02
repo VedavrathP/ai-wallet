@@ -79,7 +79,8 @@ class JournalEntry(Base):
         nullable=False,
         index=True,
     )
-    metadata: Mapped[Optional[dict[str, Any]]] = mapped_column(
+    entry_metadata: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        "metadata",  # Keep the column name in DB as "metadata"
         JSONB,
         nullable=True,
         default=dict,

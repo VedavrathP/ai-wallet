@@ -156,7 +156,7 @@ async def create_journal_entry(
         idempotency_key=idempotency_key,
         reference_id=reference_id,
         created_by_api_key_id=api_key_id,
-        metadata=metadata or {},
+        entry_metadata=metadata or {},
     )
     db.add(entry)
     await db.flush()
@@ -373,6 +373,6 @@ async def _build_transfer_response(
         amount=str(credit_line.amount),
         currency=credit_line.currency,
         reference_id=entry.reference_id,
-        metadata=entry.metadata or {},
+        metadata=entry.entry_metadata or {},
         created_at=entry.created_at,
     )
