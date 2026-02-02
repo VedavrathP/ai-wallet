@@ -20,8 +20,9 @@ COPY service/agent_wallet_service ./agent_wallet_service
 COPY service/alembic.ini .
 COPY service/alembic ./alembic
 
-# Expose port
+# Expose port (Railway uses dynamic PORT)
 EXPOSE 8000
 
-# Default command - Railway sets PORT env var
-CMD uvicorn agent_wallet_service.main:app --host 0.0.0.0 --port ${PORT:-8000}
+# Use shell form to allow variable expansion
+# Railway provides PORT env var
+CMD ["sh", "-c", "uvicorn agent_wallet_service.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
