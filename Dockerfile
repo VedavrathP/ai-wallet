@@ -8,8 +8,9 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy service dependency files
+# Copy service dependency files and README (required by pyproject.toml)
 COPY service/pyproject.toml .
+COPY service/README.md .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir .
