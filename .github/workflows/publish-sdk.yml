@@ -81,7 +81,7 @@ jobs:
 
             Install from PyPI:
             ```bash
-            pip install ai-wallet-sdk==${{ steps.version.outputs.VERSION }}
+            pip install ai-wallet==${{ steps.version.outputs.VERSION }}
             ```
 
             See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/sdk/CHANGELOG.md) for details.
