@@ -1,0 +1,6 @@
+# Test agent dependencies
+httpx>=0.26.0
+pydantic>=2.5.3
+
+# For the agent (optional - can use any LLM library)
+# openai>=1.0.0

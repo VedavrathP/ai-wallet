@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: agent_wallet_db
+    environment:
+      POSTGRES_USER: wallet_user
+      POSTGRES_PASSWORD: wallet_secret
+      POSTGRES_DB: agent_wallet
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wallet_user -d agent_wallet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  service:
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    container_name: agent_wallet_service
+    environment:
+      DATABASE_URL: postgresql+asyncpg://wallet_user:wallet_secret@postgres:5432/agent_wallet
+      DATABASE_URL_SYNC: postgresql://wallet_user:wallet_secret@postgres:5432/agent_wallet
+      SECRET_KEY: dev-secret-key-change-in-production
+      DEBUG: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./service:/app
+    command: >
+      sh -c "alembic upgrade head && uvicorn agent_wallet_service.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  postgres_data:

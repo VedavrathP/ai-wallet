@@ -1,0 +1,175 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-service:
+    name: Test Service
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wallet_user
+          POSTGRES_PASSWORD: wallet_secret
+          POSTGRES_DB: agent_wallet_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: ./service
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run migrations
+        working-directory: ./service
+        env:
+          DATABASE_URL: postgresql+asyncpg://wallet_user:wallet_secret@localhost:5432/agent_wallet_test
+          DATABASE_URL_SYNC: postgresql://wallet_user:wallet_secret@localhost:5432/agent_wallet_test
+        run: |
+          alembic upgrade head
+
+      - name: Run tests
+        working-directory: ./service
+        env:
+          DATABASE_URL: postgresql+asyncpg://wallet_user:wallet_secret@localhost:5432/agent_wallet_test
+          DATABASE_URL_SYNC: postgresql://wallet_user:wallet_secret@localhost:5432/agent_wallet_test
+        run: |
+          pytest --cov=agent_wallet_service --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./service/coverage.xml
+          flags: service
+          fail_ci_if_error: false
+
+  test-sdk:
+    name: Test SDK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: ./sdk
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        working-directory: ./sdk
+        run: |
+          pytest --cov=agent_wallet --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./sdk/coverage.xml
+          flags: sdk
+          fail_ci_if_error: false
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Lint service
+        working-directory: ./service
+        run: ruff check .
+
+      - name: Lint SDK
+        working-directory: ./sdk
+        run: ruff check .
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install mypy
+          pip install -e ./service
+          pip install -e ./sdk
+
+      - name: Type check service
+        working-directory: ./service
+        run: mypy agent_wallet_service --ignore-missing-imports
+        continue-on-error: true
+
+      - name: Type check SDK
+        working-directory: ./sdk
+        run: mypy agent_wallet --ignore-missing-imports
+        continue-on-error: true
+
+  build-sdk:
+    name: Build SDK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build SDK
+        working-directory: ./sdk
+        run: python -m build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-dist
+          path: ./sdk/dist/
